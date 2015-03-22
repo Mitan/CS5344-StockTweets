@@ -1,0 +1,5 @@
+[twitter]
+consumer_key = YourConsumerKeyHere
+consumer_secret = YourSecret
+access_token = YourToken
+access_token_secret = YourTokenSecret
