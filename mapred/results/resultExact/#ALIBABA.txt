@@ -1,0 +1,17 @@
+2012-09-05 #AliBaba	1
+2012-09-11 #alibaba	1
+2012-09-15 #Alibaba	1
+2012-09-20 #alibaba	1
+2012-10-06 #alibaba	1
+2012-10-14 #alibaba	1
+2012-10-23 #alibaba	1
+2012-11-25 #Alibaba	1
+2012-12-08 #AliBaba	1
+2012-12-12 #AliBaba	1
+2012-12-15 #alibaba	1
+2013-01-09 #alibaba	1
+2013-01-10 #alibaba	1
+2013-01-16 #Alibaba	1
+2013-02-08 #Alibaba	1
+2013-02-13 #AliBaba	1
+2013-03-21 #alibaba	1
