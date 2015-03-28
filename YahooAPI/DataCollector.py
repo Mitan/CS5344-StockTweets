@@ -3,7 +3,7 @@ import sys
 import pandas.io.data as web
 import datetime as dt
 
-def normalization_function(target_list):
+def normalization_price(target_list):
     l = len(target_list)
     answer = []
     for i in range(1, l):
@@ -11,6 +11,11 @@ def normalization_function(target_list):
         temp = 100.0 * (target_list[i] - target_list[i-1]) / target_list[i]
         answer.append(temp)
     return answer
+
+def normalization_volume(target_list):
+    mean = sum(target_list) / len(target_list)
+    return map(lambda x: x / mean, target_list)
+
 
 def GetCompanyData(startDate, endDate, companyName):
     try:
@@ -26,10 +31,11 @@ def GetCompanyData(startDate, endDate, companyName):
     volumeData = [x[4] for x in values]
 
     answer = [openData, closeData, volumeData]
-    normalized_answer = map(lambda x: normalization_function(x), answer)
+    normalized_prices = map(lambda x: normalization_price(x), [openData, closeData])
+    normalized_volumes = normalization_volume(volumeData)
     dates = map(lambda x: x.to_datetime().strftime('%Y-%m-%d'), dates)
 
-    return [dates] + answer + normalized_answer
+    return [dates] + answer + normalized_prices + [normalized_volumes]
 
 
 def GetCurrencyData(startDate, endDate, currencyType):
@@ -51,7 +57,7 @@ def process_currencies(folder, start, end):
     if not os.path.exists(normalized_currencies_directory):
         os.makedirs(normalized_currencies_directory)
 
-    currencies_data = [0 for i in range(3)]
+    currencies_data = [0,0,0]
     currencies = ["USDJPY", "EURUSD", "EURGBP"]
 
     # usd - jpy
@@ -63,9 +69,9 @@ def process_currencies(folder, start, end):
     #gbp - eur
     currencies_data[2] = map(lambda x, y: y / x, currencies_data[1], usd_uk_data)
 
-    time_period= len(dates)
+    time_period = len(dates)
     dates = map(lambda x: x.to_datetime().strftime('%Y-%m-%d'), dates)
-    normalized_currencies = map(lambda x: normalization_function(x), currencies_data)
+    normalized_currencies = map(lambda x: normalization_price(x), currencies_data)
 
     for i in range(3):
         filename = os.path.join(currencies_directory, currencies[i] + ".txt")
@@ -108,6 +114,7 @@ def process_companies(folder, start, end):
             normalized_output_file = open(normalized_filename, 'w')
 
             for j in range(time_period):
+                # not normalized values
                 output_file.write("{0}\t{1}\n".format(dates[j], round(data[i + 1][j], 4)))
 
             for j in range(1, time_period):
@@ -119,13 +126,12 @@ def process_companies(folder, start, end):
 
 
 if __name__ == "__main__":
-
     # IXIC is NASDAQ
     #GSPC is S&P
-    companies = ["AMZN", "AAPL", "BABA", "FB", "GOOG", "QQQ", "YHOO", '^IXIC', '^GSPC']
+    companies = ["AMZN", "AAPL", "FB", "GOOGL", "QQQ", "YHOO", '^IXIC', '^GSPC']
     """
-    start_date = '2015-03-02'
-    end_date = '2015-03-06'
+    start_date = '2012-08-28'
+    end_date = '2013-04-05'
     folder_name = 'C:/Users/A0134673/Downloads/TestData/'
     """
     folder_name = sys.argv[1]
@@ -143,3 +149,12 @@ if __name__ == "__main__":
     process_companies(folder_name, start_date, end_date)
 
     process_currencies(folder_name, start_date, end_date)
+
+
+    """
+    f = web.DataReader("AAPL", 'yahoo', start_date, end_date)
+    values = f.values
+    dates = f.index
+
+    print len(values)
+    """
