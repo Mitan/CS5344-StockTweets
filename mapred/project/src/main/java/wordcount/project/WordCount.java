@@ -64,12 +64,13 @@ public class WordCount {
 					while (itr.hasMoreTokens()) {
 						val += itr.nextToken();
 					}
-					boolean emit = false;
-					for(String s:inwords)
-					{
-						if(val.contains(s))
+					if (date.toString().startsWith("201")) {
+						for(String s:inwords)
 						{
-							context.write(new Text(date + " " + s), new Text(val));
+							if(val.contains(s))
+							{
+								context.write(new Text(date + " " + s), new Text(val));
+							}
 						}
 					}
 				}
