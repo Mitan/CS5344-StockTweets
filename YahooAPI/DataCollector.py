@@ -12,9 +12,21 @@ def normalization_price(target_list):
         answer.append(temp)
     return answer
 
+
 def normalization_volume(target_list):
     mean = sum(target_list) / len(target_list)
     return map(lambda x: x / mean, target_list)
+
+
+def normalization_volume_weekly(target_list):
+    target_list_copy = list(target_list)
+    l = len(target_list_copy)
+    number_of_weeks = l / 5
+    for i in range(number_of_weeks):
+        local_max =  max(target_list_copy[i * 5 : (i+1)*5])
+        target_list_copy[i * 5 : (i+1)*5] = map(lambda y: y / float(local_max), target_list_copy[i * 5 : (i+1)*5])
+
+    return target_list_copy
 
 
 def GetCompanyData(startDate, endDate, companyName):
@@ -32,9 +44,8 @@ def GetCompanyData(startDate, endDate, companyName):
 
     answer = [openData, closeData, volumeData]
     normalized_prices = map(lambda x: normalization_price(x), [openData, closeData])
-    normalized_volumes = normalization_volume(volumeData)
+    normalized_volumes = normalization_volume_weekly(volumeData)
     dates = map(lambda x: x.to_datetime().strftime('%Y-%m-%d'), dates)
-
     return [dates] + answer + normalized_prices + [normalized_volumes]
 
 
@@ -101,10 +112,18 @@ def process_companies(folder, start, end):
 
     modes = ["open", "close", "volume"]
     for company in companies:
-        # data = [dates, openData, closeData, volume, normalizedOpen, normalizedClose, normalizedVolume]
+        # raw_twitter_input = [dates, openData, closeData, volume, normalizedOpen, normalizedClose, normalizedVolume]
         data = GetCompanyData(start, end, company)
         dates = data[0]
         time_period = len(dates)
+
+        #rename
+        if company == 'NDAQ':
+            company = "NASDAQ"
+
+        elif company == "^GSPC":
+            company = "SPY"
+
 
         for i in range(3):
             filename = os.path.join(companies_directory, company + "_" + modes[i] + ".txt")
@@ -117,27 +136,32 @@ def process_companies(folder, start, end):
                 # not normalized values
                 output_file.write("{0}\t{1}\n".format(dates[j], round(data[i + 1][j], 4)))
 
-            for j in range(1, time_period):
-                # data[i+4] is corresponding normalized value, inde j - 1 because of the shift
-                normalized_output_file.write("{0}\t{1}\n".format(dates[j], round((data[i + 4])[j - 1], 4)))
+            if modes[i] == "volume":
+
+                for j in range(time_period):
+                    normalized_output_file.write("{0}\t{1}\n".format(dates[j], round((data[i + 4])[j], 4)))
+            else:
+                for j in range(1, time_period):
+                    # raw_twitter_input[i+4] is corresponding normalized value, inde j - 1 because of the shift
+                    normalized_output_file.write("{0}\t{1}\n".format(dates[j], round((data[i + 4])[j - 1], 4)))
 
             output_file.close()
             normalized_output_file.close()
 
 
 if __name__ == "__main__":
-    # IXIC is NASDAQ
+    # IXIC is NASDAQ '^IXIC'
     #GSPC is S&P
-    companies = ["AMZN", "AAPL", "FB", "GOOGL", "QQQ", "YHOO", '^IXIC', '^GSPC']
-    """
-    start_date = '2012-08-28'
-    end_date = '2013-04-05'
-    folder_name = 'C:/Users/A0134673/Downloads/TestData/'
+    companies = ["AMZN", "AAPL", "BABA", "FB", "GOOGL", "YHOO",'NDAQ', '^GSPC', "QQQ"]
+
+    start_date = '2015-03-01'
+    end_date = '2015-03-27'
+    folder_name = './stock_data'
     """
     folder_name = sys.argv[1]
     start_date = sys.argv[2]
     end_date = sys.argv[3]
-
+    """
     # transform dates into datetime
     start_date = dt.datetime.strptime(start_date, '%Y-%m-%d')
     end_date = dt.datetime.strptime(end_date, '%Y-%m-%d')
