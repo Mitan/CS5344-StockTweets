@@ -19,10 +19,10 @@ def get_users_statistics(day_group_list):
         unique_user_keys.append(key)
         one_user_messages = list(user_group)
         user_followers = (one_user_messages[0]).split()[-1]
-        if int(user_followers) <=1 : 
-			user_weight = 0
+        if int(user_followers) <=100 : 
+			user_weight = len(one_user_messages)
         else:
-			user_weight = len(one_user_messages) * math.log(int(user_followers))
+			user_weight = len(one_user_messages) * math.log(int(user_followers),100)
         unique_user_weights.append(user_weight)
     ans = [len(unique_user_keys), sum(unique_user_weights)]
     return ans
