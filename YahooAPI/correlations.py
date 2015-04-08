@@ -75,6 +75,6 @@ def process_correlations(partial_path_to_twitter_features, output_file_path):
     correlations_file.close()
 
 
-process_correlations("./twitter_data/counts/counts_", '.\count_correlations.txt')
-process_correlations("./twitter_data/users/users_", '.\users_correlations.txt')
-process_correlations("./twitter_data/weighted_users/weighted_users_", '.\weighted_users_correlations.txt')
+process_correlations("./twitter_data/counts/counts_", '.\calculated_correlations\count_correlations.txt')
+process_correlations("./twitter_data/users/users_", '.\calculated_correlations\users_correlations.txt')
+process_correlations("./twitter_data/weighted_users/weighted_users_", '.\calculated_correlations\weighted_users_correlations.txt')
