@@ -41,12 +41,11 @@ def GetCompanyData(startDate, endDate, companyName):
     openData = [x[0] for x in values]
     closeData = [x[3] for x in values]
     volumeData = [x[4] for x in values]
-
-    answer = [openData, closeData, volumeData]
+    
     normalized_prices = map(lambda x: normalization_price(x), [openData, closeData])
     normalized_volumes = normalization_volume_weekly(volumeData)
     dates = map(lambda x: x.to_datetime().strftime('%Y-%m-%d'), dates)
-    return [dates] + answer + normalized_prices + [normalized_volumes]
+    return [dates]  + normalized_prices + [normalized_volumes]
 
 
 def GetCurrencyData(startDate, endDate, currencyType):
@@ -126,26 +125,18 @@ def process_companies(folder, start, end):
 
 
         for i in range(3):
-            filename = os.path.join(companies_directory, company + "_" + modes[i] + ".txt")
-            output_file = open(filename, 'w')
 
             normalized_filename = os.path.join(normalized_companies_directory, company + "_norm_" + modes[i] + ".txt")
             normalized_output_file = open(normalized_filename, 'w')
 
-            for j in range(time_period):
-                # not normalized values
-                output_file.write("{0}\t{1}\n".format(dates[j], round(data[i + 1][j], 4)))
-
             if modes[i] == "volume":
 
                 for j in range(time_period):
-                    normalized_output_file.write("{0}\t{1}\n".format(dates[j], round((data[i + 4])[j], 4)))
+                    normalized_output_file.write("{0}\t{1}\n".format(dates[j], round((data[i + 1])[j], 4)))
             else:
                 for j in range(1, time_period):
                     # raw_twitter_input[i+4] is corresponding normalized value, inde j - 1 because of the shift
-                    normalized_output_file.write("{0}\t{1}\n".format(dates[j], round((data[i + 4])[j - 1], 4)))
-
-            output_file.close()
+                    normalized_output_file.write("{0}\t{1}\n".format(dates[j], round((data[i + 1])[j - 1], 4)))
             normalized_output_file.close()
 
 
