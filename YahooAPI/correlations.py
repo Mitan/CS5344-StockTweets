@@ -10,11 +10,11 @@ def calculate_norm(target_list, mean_of_list, lag):
     return math.sqrt(sum([(x - mean_of_list) * (x - mean_of_list) for x in reduced_list]))
 
 
-def calculate_correlation(twitter_features, stock_prices, is_volume, lag):
+def calculate_correlation(twitter_features, stock_prices, is_volume_type, lag):
     x_data = open(twitter_features, 'r').readlines()
 
     # if it is a case of volume, no need to prune one day for features
-    if not is_volume:
+    if not is_volume_type:
         x_data = x_data[1:]
     x_values = map(lambda x: float(x.split()[1]), x_data)
 
@@ -72,15 +72,23 @@ def process_correlations(partial_path_to_twitter_features, output_file_path):
                                                False, lag)
             volume = calculate_correlation(tweets_features_file, companies_directory + company + "_norm_volume.txt",
                                            True, lag)
-            answer_companies.append([company, open_price, close_price, volume])
+            difference = calculate_correlation(tweets_features_file,
+                                               companies_directory + company + "_norm_difference.txt",
+                                               True, lag)
+
+            answer_companies.append([company, open_price, close_price, volume, difference])
             correlations_file.write(
-                company + "\t" + str(open_price) + "\t" + str(close_price) + "\t" + str(volume) + '\n')
+                company + "\t" + str(open_price) + "\t" + str(close_price) + "\t" + str(volume) + "\t" + str(
+                    difference) + '\n')
 
         average_close = average([v[2] for v in answer_companies])
         average_open = average([v[1] for v in answer_companies])
         average_volume = average([v[3] for v in answer_companies])
+        average_diff = average([v[4] for v in answer_companies])
         correlations_file.write(
-            "Average\t" + str(average_open) + "\t" + str(average_close) + "\t" + str(average_volume) + '\n')
+            "Average\t" + str(average_open) + "\t" + str(average_close) + "\t" + str(average_volume) + "\t" + str(
+                average_diff)
+            + '\n')
     correlations_file.close()
 
 
