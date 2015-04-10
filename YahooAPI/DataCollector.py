@@ -26,6 +26,14 @@ def normalization_volume_weekly(target_list):
         local_max =  max(target_list_copy[i * 5 : (i+1)*5])
         target_list_copy[i * 5 : (i+1)*5] = map(lambda y: y / float(local_max), target_list_copy[i * 5 : (i+1)*5])
 
+    # if we have not integer number of week, need to normalize the tail
+    last_few_days = l % 5
+    if last_few_days != 0:
+        local_max =  max(target_list_copy[-last_few_days :])
+        target_list_copy[-last_few_days : ] = map(lambda y: y / float(local_max), target_list_copy[-last_few_days : ])
+
+
+
     return target_list_copy
 
 
@@ -149,7 +157,7 @@ if __name__ == "__main__":
     companies = ["AMZN", "AAPL", "BABA", "FB", "GOOGL", "YHOO",'NDAQ', '^GSPC', "QQQ"]
 
     start_date = '2015-03-01'
-    end_date = '2015-03-27'
+    end_date = '2015-04-04'
     folder_name = './stock_data'
     """
     folder_name = sys.argv[1]

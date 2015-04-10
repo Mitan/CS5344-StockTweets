@@ -38,6 +38,12 @@ def normalization_volume_weekly(target_list):
         local_max = max(target_list_copy[i * 5: (i + 1) * 5])
         target_list_copy[i * 5: (i + 1) * 5] = map(lambda y: y / float(local_max), target_list_copy[i * 5: (i + 1) * 5])
 
+    # if we have not integer number of weeks, need to normalize the tail
+    last_few_days = l % 5
+    if last_few_days != 0:
+        local_max =  max(target_list_copy[-last_few_days :])
+        target_list_copy[-last_few_days : ] = map(lambda y: y / float(local_max), target_list_copy[-last_few_days : ])
+
     return target_list_copy
 
 
@@ -57,7 +63,7 @@ def process_one_file(input_filename):
         lines = input_file.readlines()
 
     # group tweets by date
-    for key, day_group in groupby(lines, lambda x: (x.split()[2])):
+    for key, day_group in groupby(lines, lambda x: (x.split()[1])):
         # store count per day
         day_group_list = list(day_group)
         users, weighted_users = get_users_statistics(day_group_list)
