@@ -26,6 +26,14 @@ def normalization_volume_weekly(target_list):
         local_max =  max(target_list_copy[i * 5 : (i+1)*5])
         target_list_copy[i * 5 : (i+1)*5] = map(lambda y: y / float(local_max), target_list_copy[i * 5 : (i+1)*5])
 
+    # if we have not integer number of week, need to normalize the tail
+    last_few_days = l % 5
+    if last_few_days != 0:
+        local_max =  max(target_list_copy[-last_few_days :])
+        target_list_copy[-last_few_days : ] = map(lambda y: y / float(local_max), target_list_copy[-last_few_days : ])
+
+
+
     return target_list_copy
 
 
@@ -41,12 +49,14 @@ def GetCompanyData(startDate, endDate, companyName):
     openData = [x[0] for x in values]
     closeData = [x[3] for x in values]
     volumeData = [x[4] for x in values]
+    dayDifferenceData = [abs(x[0] - x[1]) for x in values]
 
-    answer = [openData, closeData, volumeData]
+
     normalized_prices = map(lambda x: normalization_price(x), [openData, closeData])
     normalized_volumes = normalization_volume_weekly(volumeData)
+    normalized_difference = normalization_volume_weekly(dayDifferenceData)
     dates = map(lambda x: x.to_datetime().strftime('%Y-%m-%d'), dates)
-    return [dates] + answer + normalized_prices + [normalized_volumes]
+    return [dates]  + normalized_prices + [normalized_volumes, normalized_difference]
 
 
 def GetCurrencyData(startDate, endDate, currencyType):
@@ -110,7 +120,7 @@ def process_companies(folder, start, end):
     if not os.path.exists(normalized_companies_directory):
         os.makedirs(normalized_companies_directory)
 
-    modes = ["open", "close", "volume"]
+    modes = ["open", "close", "volume", "difference"]
     for company in companies:
         # raw_twitter_input = [dates, openData, closeData, volume, normalizedOpen, normalizedClose, normalizedVolume]
         data = GetCompanyData(start, end, company)
@@ -125,27 +135,19 @@ def process_companies(folder, start, end):
             company = "SPY"
 
 
-        for i in range(3):
-            filename = os.path.join(companies_directory, company + "_" + modes[i] + ".txt")
-            output_file = open(filename, 'w')
+        for i in range(4):
 
             normalized_filename = os.path.join(normalized_companies_directory, company + "_norm_" + modes[i] + ".txt")
             normalized_output_file = open(normalized_filename, 'w')
 
-            for j in range(time_period):
-                # not normalized values
-                output_file.write("{0}\t{1}\n".format(dates[j], round(data[i + 1][j], 4)))
-
-            if modes[i] == "volume":
+            if modes[i] == "volume" or modes[i] == "difference":
 
                 for j in range(time_period):
-                    normalized_output_file.write("{0}\t{1}\n".format(dates[j], round((data[i + 4])[j], 4)))
+                    normalized_output_file.write("{0}\t{1}\n".format(dates[j], round((data[i + 1])[j], 4)))
             else:
                 for j in range(1, time_period):
                     # raw_twitter_input[i+4] is corresponding normalized value, inde j - 1 because of the shift
-                    normalized_output_file.write("{0}\t{1}\n".format(dates[j], round((data[i + 4])[j - 1], 4)))
-
-            output_file.close()
+                    normalized_output_file.write("{0}\t{1}\n".format(dates[j], round((data[i + 1])[j - 1], 4)))
             normalized_output_file.close()
 
 
@@ -155,7 +157,7 @@ if __name__ == "__main__":
     companies = ["AMZN", "AAPL", "BABA", "FB", "GOOGL", "YHOO",'NDAQ', '^GSPC', "QQQ"]
 
     start_date = '2015-03-01'
-    end_date = '2015-03-27'
+    end_date = '2015-04-04'
     folder_name = './stock_data'
     """
     folder_name = sys.argv[1]
