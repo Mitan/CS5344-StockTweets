@@ -157,7 +157,7 @@ if __name__ == "__main__":
     companies = ["AMZN", "AAPL", "BABA", "FB", "GOOGL", "YHOO",'NDAQ', '^GSPC', "QQQ"]
 
     start_date = '2015-03-01'
-    end_date = '2015-04-04'
+    end_date = '2015-04-11'
     folder_name = './stock_data'
     """
     folder_name = sys.argv[1]

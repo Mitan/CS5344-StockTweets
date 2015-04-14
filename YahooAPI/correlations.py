@@ -21,11 +21,6 @@ def calculate_correlation(twitter_features, stock_prices, is_volume_type, lag):
     y_data = open(stock_prices, 'r').readlines()
     y_values = map(lambda x: float(x.split()[1]), y_data)
 
-    #hack
-    #todo fix
-    # we do not have the data for stock for the last day, 04-03 so need to delete the last day from twitter
-    if len(x_data) > len(y_data):
-        x_data = x_data[:-1]
     # from this moment we just have x and y and can use the formula for cross-corelation coefficient
 
     # for debug

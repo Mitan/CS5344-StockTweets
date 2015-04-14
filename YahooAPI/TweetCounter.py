@@ -1,5 +1,6 @@
 from itertools import groupby
-from datetime import datetime
+import datetime as dt
+
 import math
 import os
 
@@ -7,7 +8,11 @@ all_companies = {}
 
 
 def check_if_not_weekend(day_string):
-    day = datetime.strptime(day_string, '%Y-%m-%d').weekday()
+    try:
+        day = dt.datetime.strptime(day_string, '%Y-%m-%d').weekday()
+    # catch bad format tweets
+    except:
+        return False
     if day == 5 or day == 6:
         return False
     return True
@@ -47,16 +52,17 @@ def normalization_volume_weekly(target_list):
     return target_list_copy
 
 
-def normalize_and_output(dates, data, output_file):
+def normalize_and_output(dates, data, output_file, given_period, exlude_period):
     normalized_data = normalization_volume_weekly(data)
     dates_and_data = zip(dates, normalized_data)
-    dates_and_data_for_output = map(lambda v: v[0] + '\t' + str(v[1]) + '\n', dates_and_data)
+    filtered_dates_and_data = [x for x in dates_and_data if x[0] in given_period and (not x[0] in exlude_period)]
+    dates_and_data_for_output = map(lambda v: v[0] + '\t' + str(v[1]) + '\n', filtered_dates_and_data)
     output_file = open(output_file, 'w')
     output_file.writelines(dates_and_data_for_output)
     output_file.close()
 
-
-def process_one_file(input_filename):
+# process all but output just given list
+def process_one_file(input_filename, period, exclude):
     data_by_day = {}
     # read file input
     with open("./raw_twitter_input/" + input_filename, 'r') as input_file:
@@ -71,7 +77,7 @@ def process_one_file(input_filename):
 
     data_by_day = data_by_day.items()
     # don't have stock data for 03-07
-    items_removed_weekends = [v for v in data_by_day if check_if_not_weekend(v[0]) and v != "2015-03-07"]
+    items_removed_weekends = [v for v in data_by_day if check_if_not_weekend(v[0])]
     sorted_result = sorted(items_removed_weekends, key=lambda tup: tup[0])
 
     dates = [v[0] for v in sorted_result]
@@ -79,14 +85,33 @@ def process_one_file(input_filename):
     sorted_tweet_users = [v[1][1] for v in sorted_result]
     sorted_tweet_weight_users = [v[1][2] for v in sorted_result]
 
-    normalize_and_output(dates, sorted_tweet_counts, "./twitter_data/counts/counts_" + input_filename)
-    normalize_and_output(dates, sorted_tweet_users, "./twitter_data/users/users_" + input_filename)
-    normalize_and_output(dates, sorted_tweet_weight_users,
-                         "./twitter_data/weighted_users/weighted_users_" + input_filename)
 
+    normalize_and_output(dates, sorted_tweet_counts, "./twitter_data/counts/counts_" + input_filename, period, exclude)
+    normalize_and_output(dates, sorted_tweet_users, "./twitter_data/users/users_" + input_filename, period, exclude)
+    normalize_and_output(dates, sorted_tweet_weight_users,
+                         "./twitter_data/weighted_users/weighted_users_" + input_filename, period, exclude)
+
+
+def calculate_timerange(start, end):
+    start = dt.datetime.strptime(start, '%Y-%m-%d')
+    end = dt.datetime.strptime(end, '%Y-%m-%d')
+    day_count = (end - start).days + 1
+    r = [single_date for single_date in (start + dt.timedelta(n) for n in range(day_count))]
+    r = map(lambda x: x.strftime("%Y-%m-%d"), r)
+    return r
 
 if __name__ == "__main__":
+    start_date = '2015-03-01'
+    end_date = '2015-04-11'
+    period_range = calculate_timerange(start_date, end_date)
+
+    currencies = ["USDJPY", "EURUSD", "EURGBP"]
+
+
     files = [f for f in os.listdir('./raw_twitter_input')]
     for f in files:
         if f.endswith(".txt"):
-            process_one_file(f)
+            #make a list of dates, for which we don't have stock data. it is different for currencies and companies
+            name = f[:-4]
+            exclude_range = [] if name in currencies else ['2015-04-03']
+            process_one_file(f, period_range, exclude_range)
