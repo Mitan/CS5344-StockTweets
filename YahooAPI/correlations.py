@@ -23,13 +23,22 @@ def calculate_correlation(twitter_features, stock_prices, is_volume_type, lag):
 
     # from this moment we just have x and y and can use the formula for cross-corelation coefficient
 
+    #ugly hack
+    #todo fix
+    # for page rank we have twitter features for not all the month
+    len_x = len(x_values)
+    len_y = len(y_values)
+    diff = len_y - len_x
+    if diff > 0:
+        y_values = y_values[: - diff]
+
     # for debug
-    if len(x_data) != len(y_data):
+    if len(x_values) != len(y_values):
         raise Exception(
-            "dimensions of raw_twitter_input are not equal for " + stock_prices + " " + str(len(x_data)) + " " + str(
-                len(y_data)))
+            "dimensions of raw_twitter_input are not equal for " + stock_prices + " " + str(len(x_values)) + " " + str(
+                len(y_values)))
         return
-    length = len(x_data)
+    length = len(x_values)
 
     mean_x = sum(x_values) / float(length)
     mean_y = sum(y_values) / float(length)
@@ -45,10 +54,11 @@ def calculate_correlation(twitter_features, stock_prices, is_volume_type, lag):
     return correlation
 
 
-def process_correlations(partial_path_to_twitter_features, output_file_path):
+def process_correlations(partial_path_to_twitter_features, output_file_path, is_pagerank):
     correlations_file = open(output_file_path, 'w')
-    companies = ["AMZN", "AAPL", "BABA", "FB", "GOOGL", "YHOO", "NASDAQ", "SPY", "QQQ"]
-    currencies = ["USDJPY", "EURUSD", "EURGBP"]
+    companies = ["AMZN", "BABA", "FB",  "YHOO"] if is_pagerank \
+        else ["AMZN", "AAPL", "BABA", "FB", "GOOGL", "YHOO", "NASDAQ", "SPY", "QQQ"]
+    currencies = ["EURUSD"] if is_pagerank else ["USDJPY", "EURUSD", "EURGBP"]
     lags = range(-3, 4, 1)
 
     for lag in lags:
@@ -92,7 +102,9 @@ def process_correlations(partial_path_to_twitter_features, output_file_path):
     correlations_file.close()
 
 
-process_correlations("./twitter_data/counts/counts_", './calculated_correlations/count_correlations.txt')
-process_correlations("./twitter_data/users/users_", './calculated_correlations/users_correlations.txt')
+process_correlations("./twitter_data/weighted_pr_users/weighted_pr_users_", './calculated_correlations/weight_pr_correlations.txt', True)
+process_correlations("./twitter_data/average_pr/average_pr_", './calculated_correlations/average_pr_correlations.txt', True)
+process_correlations("./twitter_data/counts/counts_", './calculated_correlations/count_correlations.txt', False)
+process_correlations("./twitter_data/users/users_", './calculated_correlations/users_correlations.txt', False)
 process_correlations("./twitter_data/weighted_users/weighted_users_",
-                     './calculated_correlations/weighted_users_correlations.txt')
+                     './calculated_correlations/weighted_users_correlations.txt', False)
