@@ -6,8 +6,9 @@ def average(target_list):
 
 
 def calculate_norm(target_list, mean_of_list, lag):
-    reduced_list = target_list[lag:] if lag >= 0 else target_list[:lag]
-    return math.sqrt(sum([(x - mean_of_list) * (x - mean_of_list) for x in reduced_list]))
+ #   reduced_list = target_list[lag:] if lag >= 0 else target_list[:lag]
+
+    return math.sqrt(sum([(x - mean_of_list) * (x - mean_of_list) for x in target_list]))
 
 
 def calculate_correlation(twitter_features, stock_prices, is_volume_type, lag):
@@ -42,13 +43,25 @@ def calculate_correlation(twitter_features, stock_prices, is_volume_type, lag):
 
     mean_x = sum(x_values) / float(length)
     mean_y = sum(y_values) / float(length)
-
-    norm_x = calculate_norm(x_values, mean_x, 0)
-    norm_y = calculate_norm(y_values, mean_y, lag)
-
-    range_for_calculation = range(lag, length) if lag >= 0 else range(length + lag)
-
-    coefficient_list = [(x_values[i] - mean_x) * (y_values[i] - mean_y) for i in range_for_calculation]
+    #Y lag
+    if(lag > 0):
+		reduced_list_x = x_values[lag:]
+		reduced_list_y = y_values[:-lag]
+    elif (lag < 0):
+		reduced_list_x = x_values[:lag]
+		reduced_list_y = y_values[-lag:]		
+    else:
+		reduced_list_x = x_values[:]
+		reduced_list_y = y_values[:]
+    new_mean_x = sum(reduced_list_x)/float(len(reduced_list_x))
+    new_mean_y = sum(reduced_list_y)/float(len(reduced_list_y))
+    
+    #reduced_list = target_list[lag:] if lag >= 0 else target_list[:lag]
+    
+    norm_x = calculate_norm(reduced_list_x, new_mean_x, 0)
+    norm_y = calculate_norm(reduced_list_y, new_mean_y, lag)
+   # range_for_calculation = range(lag, length) if lag >= 0 else range(length + lag)
+    coefficient_list = [(reduced_list_x[i] - new_mean_x) * (reduced_list_y[i] - new_mean_y) for i in range(0,len(x_values)-abs(lag))]
 
     correlation = sum(coefficient_list) / (norm_x * norm_y)
     return correlation
