@@ -56,7 +56,7 @@ def calculate_correlation(twitter_features, stock_prices, is_volume_type, lag):
     new_mean_x = sum(reduced_list_x) / float(len(reduced_list_x))
     new_mean_y = sum(reduced_list_y) / float(len(reduced_list_y))
 
-    #reduced_list = target_list[lag:] if lag >= 0 else target_list[:lag]
+    # reduced_list = target_list[lag:] if lag >= 0 else target_list[:lag]
 
     norm_x = calculate_norm(reduced_list_x, new_mean_x, 0)
     norm_y = calculate_norm(reduced_list_y, new_mean_y, lag)
@@ -86,7 +86,7 @@ def process_correlations(partial_path_to_twitter_features, output_file_path, is_
             currencies_directory = "./stock_data/currencies/normalized_currencies/"
             price = calculate_correlation(tweets_features_file, currencies_directory + currency + "_norm.txt", False,
                                           lag)
-            correlations_file.write(currency + "\t" + str(round(price,4)) + '\n')
+            correlations_file.write(currency + "\t" + str(round(price, 4)) + '\n')
 
         for company in companies:
             tweets_features_file = partial_path_to_twitter_features + company + ".txt"
@@ -110,11 +110,12 @@ def process_correlations(partial_path_to_twitter_features, output_file_path, is_
             current_company_answer[1:] = map(lambda x: round(x, 4), current_company_answer[1:])
             answer_companies.append(current_company_answer)
 
-            #formatting
+            # formatting
             short = ["QQQ", "FB", "SPY"]
             company = company + "  " if company in short else company
             correlations_file.write(
-                company + "\t" + str(current_company_answer[1]) + "\t\t\t" + str(current_company_answer[2]) + "\t\t\t" + str(
+                company + "\t" + str(current_company_answer[1]) + "\t\t\t" + str(
+                    current_company_answer[2]) + "\t\t\t" + str(
                     current_company_answer[3]) + "\t\t\t" + str(
                     current_company_answer[4]) + "\t\t\t" + str(current_company_answer[5]) + '\n')
 
@@ -124,8 +125,9 @@ def process_correlations(partial_path_to_twitter_features, output_file_path, is_
         average_diff = average([v[4] for v in answer_companies])
         average_binary_diff = average([v[5] for v in answer_companies])
         correlations_file.write(
-            "Average\t" + str(average_open) + "\t\t" + str(average_close) + "\t\t" + str(average_volume) + "\t\t" + str(
-                average_diff) + "\t\t" + str(average_binary_diff)
+            "Aver\t" + str(round(average_open, 4)) + "\t\t\t" + str(round(average_close, 4)) + "\t\t\t" + str(
+                round(average_volume, 4)) + "\t\t\t" + str(
+                round(average_diff,4)) + "\t\t\t" + str(round(average_binary_diff,4))
             + '\n')
     correlations_file.close()
 
