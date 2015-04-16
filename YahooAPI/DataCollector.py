@@ -49,14 +49,16 @@ def GetCompanyData(startDate, endDate, companyName):
     openData = [x[0] for x in values]
     closeData = [x[3] for x in values]
     volumeData = [x[4] for x in values]
-    dayDifferenceData = [abs(x[0] - x[1]) for x in values]
-
+    # open - close
+    dayDifferenceData = [abs(x[0] - x[3]) for x in values]
+    # this feature doesn't nedd normalization
+    binary_diff = [1 if x[3] > x[0] else 0 for x in values]
 
     normalized_prices = map(lambda x: normalization_price(x), [openData, closeData])
     normalized_volumes = normalization_volume_weekly(volumeData)
     normalized_difference = normalization_volume_weekly(dayDifferenceData)
     dates = map(lambda x: x.to_datetime().strftime('%Y-%m-%d'), dates)
-    return [dates]  + normalized_prices + [normalized_volumes, normalized_difference]
+    return [dates]  + normalized_prices + [normalized_volumes, normalized_difference, binary_diff]
 
 
 def GetCurrencyData(startDate, endDate, currencyType):
@@ -120,7 +122,7 @@ def process_companies(folder, start, end):
     if not os.path.exists(normalized_companies_directory):
         os.makedirs(normalized_companies_directory)
 
-    modes = ["open", "close", "volume", "difference"]
+    modes = ["open", "close", "volume", "difference", "binary_diff"]
     for company in companies:
         # raw_twitter_input = [dates, openData, closeData, volume, normalizedOpen, normalizedClose, normalizedVolume]
         data = GetCompanyData(start, end, company)
@@ -135,12 +137,12 @@ def process_companies(folder, start, end):
             company = "SPY"
 
 
-        for i in range(4):
+        for i in range(5):
 
             normalized_filename = os.path.join(normalized_companies_directory, company + "_norm_" + modes[i] + ".txt")
             normalized_output_file = open(normalized_filename, 'w')
 
-            if modes[i] == "volume" or modes[i] == "difference":
+            if modes[i] == "volume" or modes[i] == "difference" or modes[i] == "binary_diff":
 
                 for j in range(time_period):
                     normalized_output_file.write("{0}\t{1}\n".format(dates[j], round((data[i + 1])[j], 4)))
