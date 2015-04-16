@@ -126,12 +126,12 @@ def process_companies(folder, start, end):
         data = GetCompanyData(start, end, company)
         dates = data[0]
         time_period = len(dates)
-
+        '''
         #rename
-        if company == 'NDAQ':
+        if company == '^IXIC':
             company = "NASDAQ"
-
-        elif company == "^GSPC":
+        '''
+        if company == "^GSPC":
             company = "SPY"
 
 
@@ -154,7 +154,7 @@ def process_companies(folder, start, end):
 if __name__ == "__main__":
     # IXIC is NASDAQ '^IXIC'
     #GSPC is S&P
-    companies = ["AMZN", "AAPL", "BABA", "FB", "GOOGL", "YHOO",'NDAQ', '^GSPC', "QQQ"]
+    companies = ["AMZN", "AAPL", "BABA", "FB", "GOOGL", "YHOO",'^GSPC', "QQQ"]
 
     start_date = '2015-03-01'
     end_date = '2015-04-11'
