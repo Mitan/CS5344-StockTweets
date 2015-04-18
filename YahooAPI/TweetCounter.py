@@ -180,7 +180,7 @@ def calculate_timerange(start, end):
 
 if __name__ == "__main__":
     start_date = '2015-03-01'
-    end_date = '2015-04-11'
+    end_date = '2015-04-18'
     period_range = calculate_timerange(start_date, end_date)
 
     currencies = ["USDJPY", "EURUSD", "EURGBP"]
