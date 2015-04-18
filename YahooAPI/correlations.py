@@ -73,6 +73,7 @@ def process_correlations(partial_path_to_twitter_features, output_file_path, is_
 
     companies = ["AMZN", "BABA", "FB", "YHOO", "QQQ", "SPY"] if is_pagerank \
         else ["AMZN", "AAPL", "BABA", "FB", "GOOGL", "YHOO", "SPY", "QQQ"]
+
     currencies = ["EURUSD", "USDJPY"] if is_pagerank else ["USDJPY", "EURUSD", "EURGBP"]
     lags = range(-3, 4, 1)
 

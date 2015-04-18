@@ -52,29 +52,38 @@ def get_page_statistics(day_group_list, page_rank_values):
         unique_user_ranks.append(user_rank)
     # return score for given day with weight of user pr and average pr a day
     ans = [sum(unique_user_weights), sum(unique_user_ranks) / float(len(unique_user_ranks)), sum(unique_user_ranks)]
-    #ans = [sum(unique_user_weights), sum(unique_user_ranks)]
+    # ans = [sum(unique_user_weights), sum(unique_user_ranks)]
     return ans
 
 
-def normalization_volume_weekly(target_list):
+def normalization_volume(target_list, company_name):
     target_list_copy = list(target_list)
-    l = len(target_list_copy)
-    number_of_weeks = l / 5
-    for i in range(number_of_weeks):
-        local_max = average(target_list_copy[i * 5: (i + 1) * 5])
-        target_list_copy[i * 5: (i + 1) * 5] = map(lambda y: y / float(local_max), target_list_copy[i * 5: (i + 1) * 5])
 
-    # if we have not integer number of weeks, need to normalize the tail
-    last_few_days = l % 5
-    if last_few_days != 0:
-        local_max = average(target_list_copy[-last_few_days:])
-        target_list_copy[-last_few_days:] = map(lambda y: y / float(local_max), target_list_copy[-last_few_days:])
+    comps = ["AAPL", "GOOGL"]
+    # if average company perform global
+    if company_name not in comps:
+        av = average(target_list_copy)
+        target_list_copy = map(lambda x: x / av, target_list_copy)
+
+    else:
+        l = len(target_list_copy)
+        number_of_weeks = l / 5
+        for i in range(number_of_weeks):
+            local_max = average(target_list_copy[i * 5: (i + 1) * 5])
+            target_list_copy[i * 5: (i + 1) * 5] = map(lambda y: y / float(local_max),
+                                                       target_list_copy[i * 5: (i + 1) * 5])
+
+        # if we have not integer number of weeks, need to normalize the tail
+        last_few_days = l % 5
+        if last_few_days != 0:
+            local_max = average(target_list_copy[-last_few_days:])
+            target_list_copy[-last_few_days:] = map(lambda y: y / float(local_max), target_list_copy[-last_few_days:])
 
     return target_list_copy
 
 
-def normalize_and_output(dates, data, output_file, given_period, exlude_period):
-    normalized_data = normalization_volume_weekly(data)
+def normalize_and_output(dates, data, output_file, given_period, exlude_period, company_name):
+    normalized_data = normalization_volume(data, company_name)
     dates_and_data = zip(dates, normalized_data)
     filtered_dates_and_data = [x for x in dates_and_data if x[0] in given_period and (not x[0] in exlude_period)]
     dates_and_data_for_output = map(lambda v: v[0] + '\t' + str(v[1]) + '\n', filtered_dates_and_data)
@@ -84,10 +93,10 @@ def normalize_and_output(dates, data, output_file, given_period, exlude_period):
 
 
 # process all but output just given list
-def process_one_file(input_filename, period, exclude):
+def process_one_file(company_name, period, exclude):
     data_by_day = {}
     # read file input
-    with open("./raw_twitter_input/" + input_filename, 'r') as input_file:
+    with open("./raw_twitter_input/" + company_name + ".txt", 'r') as input_file:
         lines = input_file.readlines()
 
     # group tweets by date
@@ -107,17 +116,20 @@ def process_one_file(input_filename, period, exclude):
     sorted_tweet_users = [v[1][1] for v in sorted_result]
     sorted_tweet_weight_users = [v[1][2] for v in sorted_result]
 
-    normalize_and_output(dates, sorted_tweet_counts, "./twitter_data/counts/counts_" + input_filename, period, exclude)
-    normalize_and_output(dates, sorted_tweet_users, "./twitter_data/users/users_" + input_filename, period, exclude)
+    normalize_and_output(dates, sorted_tweet_counts, "./twitter_data/counts/counts_" + company_name + ".txt", period,
+                         exclude, company_name)
+    normalize_and_output(dates, sorted_tweet_users, "./twitter_data/users/users_" + company_name + ".txt", period,
+                         exclude, company_name)
     normalize_and_output(dates, sorted_tweet_weight_users,
-                         "./twitter_data/weighted_users/weighted_users_" + input_filename, period, exclude)
+                         "./twitter_data/weighted_users/weighted_users_" + company_name + ".txt", period, exclude,
+                         company_name)
 
 
 # process all but output just given list
-def process_one_file_for_pagerank(input_filename, period, exclude, rank_path):
+def process_one_file_for_pagerank(company_name, period, exclude, rank_path):
     data_by_day = {}
     # read file input
-    with open("./raw_twitter_input/" + input_filename, 'r') as input_file:
+    with open("./raw_twitter_input/" + company_name + ".txt", 'r') as input_file:
         lines = input_file.readlines()
 
     # get rank values
@@ -148,11 +160,13 @@ def process_one_file_for_pagerank(input_filename, period, exclude, rank_path):
     sorted_full_pr = [v[1][2] for v in sorted_result]
 
     normalize_and_output(dates, sorted_weight_pr,
-                         "./twitter_data/weighted_pr_users/weighted_pr_users_" + input_filename, period, exclude)
-    normalize_and_output(dates, sorted_average_pr, "./twitter_data/average_pr/average_pr_" + input_filename, period,
-                         exclude)
-    normalize_and_output(dates, sorted_full_pr, "./twitter_data/full_pr/full_pr_" + input_filename, period,
-                         exclude)
+                         "./twitter_data/weighted_pr_users/weighted_pr_users_" + company_name + ".txt", period, exclude,
+                         company_name)
+    normalize_and_output(dates, sorted_average_pr, "./twitter_data/average_pr/average_pr_" + company_name + ".txt",
+                         period,
+                         exclude, company_name)
+    normalize_and_output(dates, sorted_full_pr, "./twitter_data/full_pr/full_pr_" + company_name + ".txt", period,
+                         exclude, company_name)
 
 
 def calculate_timerange(start, end):
@@ -175,9 +189,9 @@ if __name__ == "__main__":
     for f in files:
         if f.endswith(".txt"):
             # make a list of dates, for which we don't have stock data. it is different for currencies and companies
-            name = f[:-4]
+            name = str(f[:-4])
             exclude_range = [] if name in currencies else ['2015-04-03']
-            process_one_file(f, period_range, exclude_range)
+            process_one_file(name, period_range, exclude_range)
 
     # process pr
     start_date_pr = '2015-03-01'
@@ -188,4 +202,4 @@ if __name__ == "__main__":
     for symbol in pr_symbols:
         exclude_range = [] if symbol in currencies else ['2015-04-03']
         rank_path_file = "./page_ranks/pagerank_" + symbol
-        process_one_file_for_pagerank(symbol + ".txt", period_range_pr, exclude_range, rank_path_file)
+        process_one_file_for_pagerank(symbol, period_range_pr, exclude_range, rank_path_file)

@@ -22,23 +22,31 @@ def normalization_volume(target_list):
     return map(lambda x: x / mean, target_list)
 
 
-def normalization_volume_weekly(target_list):
+def normalization_volume(target_list, company_name):
     target_list_copy = list(target_list)
-    l = len(target_list_copy)
-    number_of_weeks = l / 5
-    for i in range(number_of_weeks):
-        local_max =  average(target_list_copy[i * 5 : (i+1)*5])
-        target_list_copy[i * 5 : (i+1)*5] = map(lambda y: y / float(local_max), target_list_copy[i * 5 : (i+1)*5])
 
-    # if we have not integer number of week, need to normalize the tail
-    last_few_days = l % 5
-    if last_few_days != 0:
-        local_max =  average(target_list_copy[-last_few_days :])
-        target_list_copy[-last_few_days : ] = map(lambda y: y / float(local_max), target_list_copy[-last_few_days : ])
+    comps = ["AAPL", "GOOGL"]
+    # if average company perform global
+    if company_name not in comps:
+        av = average(target_list_copy)
+        target_list_copy = map(lambda x: x / av, target_list_copy)
 
+    else:
+        l = len(target_list_copy)
+        number_of_weeks = l / 5
+        for i in range(number_of_weeks):
+            local_max = average(target_list_copy[i * 5: (i + 1) * 5])
+            target_list_copy[i * 5: (i + 1) * 5] = map(lambda y: y / float(local_max),
+                                                       target_list_copy[i * 5: (i + 1) * 5])
 
+        # if we have not integer number of weeks, need to normalize the tail
+        last_few_days = l % 5
+        if last_few_days != 0:
+            local_max = average(target_list_copy[-last_few_days:])
+            target_list_copy[-last_few_days:] = map(lambda y: y / float(local_max), target_list_copy[-last_few_days:])
 
     return target_list_copy
+
 
 
 def GetCompanyData(startDate, endDate, companyName):
@@ -59,8 +67,8 @@ def GetCompanyData(startDate, endDate, companyName):
     binary_diff = [1 if x[3] > x[0] else 0 for x in values]
 
     normalized_prices = map(lambda x: normalization_price(x), [openData, closeData])
-    normalized_volumes = normalization_volume_weekly(volumeData)
-    normalized_difference = normalization_volume_weekly(dayDifferenceData)
+    normalized_volumes = normalization_volume(volumeData, companyName)
+    normalized_difference = normalization_volume(dayDifferenceData, companyName)
     dates = map(lambda x: x.to_datetime().strftime('%Y-%m-%d'), dates)
     return [dates]  + normalized_prices + [normalized_volumes, normalized_difference, binary_diff]
 
@@ -161,7 +169,6 @@ if __name__ == "__main__":
     # IXIC is NASDAQ '^IXIC'
     #GSPC is S&P
     companies = ["AMZN", "AAPL", "BABA", "FB", "GOOGL", "YHOO",'^GSPC', "QQQ"]
-    #companies = ["AMZN", "BABA", "FB", "YHOO",'^GSPC', "QQQ"]
 
     start_date = '2015-03-01'
     end_date = '2015-04-11'
