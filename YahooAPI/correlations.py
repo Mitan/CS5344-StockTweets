@@ -71,9 +71,9 @@ def calculate_correlation(twitter_features, stock_prices, is_volume_type, lag):
 def process_correlations(partial_path_to_twitter_features, output_file_path, is_pagerank):
     correlations_file = open(output_file_path, 'w')
 
-    companies = ["AMZN", "BABA", "FB", "YHOO"] if is_pagerank \
+    companies = ["AMZN", "BABA", "FB", "YHOO", "QQQ", "SPY"] if is_pagerank \
         else ["AMZN", "AAPL", "BABA", "FB", "GOOGL", "YHOO", "SPY", "QQQ"]
-    currencies = ["EURUSD"] if is_pagerank else ["USDJPY", "EURUSD", "EURGBP"]
+    currencies = ["EURUSD", "USDJPY"] if is_pagerank else ["USDJPY", "EURUSD", "EURGBP"]
     lags = range(-3, 4, 1)
 
     for lag in lags:

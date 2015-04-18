@@ -173,7 +173,7 @@ if __name__ == "__main__":
     period_range_pr = calculate_timerange(start_date_pr, end_date_pr)
 
 
-    pr_symbols = ["AMZN", "BABA", "EURUSD", "FB", "YHOO"]
+    pr_symbols = ["AMZN", "BABA", "EURUSD", "FB", "YHOO", "QQQ", "SPY", "USDJPY"]
     for symbol in pr_symbols:
         exclude_range = [] if symbol in currencies else ['2015-04-03']
         rank_path_file = "./page_ranks/pagerank_" + symbol
