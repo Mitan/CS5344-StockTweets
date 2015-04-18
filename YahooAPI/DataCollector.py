@@ -95,6 +95,7 @@ def process_currencies(folder, start, end):
     currencies_data = [0,0,0]
     currencies = ["USDJPY", "EURUSD", "EURGBP"]
 
+    """
     # usd - jpy
     dates, currencies_data[0] = GetCurrencyData(start, end, 'DEXJPUS')
     #eur - usd
@@ -103,25 +104,32 @@ def process_currencies(folder, start, end):
     usd_uk_data = GetCurrencyData(start, end, 'DEXUSUK')[1]
     #gbp - eur
     currencies_data[2] = map(lambda x, y: y / x, currencies_data[1], usd_uk_data)
+    dates = map(lambda x: x.to_datetime().strftime('%Y-%m-%d'), dates)
+    """
+    with open("./stock_data/currencies/USDJPY.txt", 'r') as f:
+        dates_lines = f.readlines()
+
+    dates = map(lambda x: x.split()[0], dates_lines)
+    currencies_data[0] = map(lambda x: float(x.split()[1]), dates_lines)
+
+    with open("./stock_data/currencies/EURUSD.txt", 'r') as f:
+        dates_lines = f.readlines()
+    currencies_data[1] = map(lambda x: float(x.split()[1]), dates_lines)
+
+    with open("./stock_data/currencies/EURGBP.txt", 'r') as f:
+        dates_lines = f.readlines()
+    currencies_data[2] = map(lambda x: float(x.split()[1]), dates_lines)
 
     time_period = len(dates)
-    dates = map(lambda x: x.to_datetime().strftime('%Y-%m-%d'), dates)
+
     normalized_currencies = map(lambda x: normalization_price(x), currencies_data)
 
     for i in range(3):
-        filename = os.path.join(currencies_directory, currencies[i] + ".txt")
-        output_file = open(filename, 'w')
-
         normalized_filename = os.path.join(normalized_currencies_directory,currencies[i] + "_norm.txt")
         normalized_output_file = open(normalized_filename, 'w')
 
-        for j in range(time_period):
-            output_file.write("{0}\t{1}\n".format(dates[j], round(currencies_data[i][j], 4)))
-
         for j in range(1, time_period):
             normalized_output_file.write("{0}\t{1}\n".format(dates[j], round(normalized_currencies[i][j - 1], 4)))
-
-        output_file.close()
         normalized_output_file.close()
 
 
@@ -140,14 +148,6 @@ def process_companies(folder, start, end):
         data = GetCompanyData(start, end, company)
         dates = data[0]
         time_period = len(dates)
-        '''
-        #rename
-        if company == '^IXIC':
-            company = "NASDAQ"
-        '''
-        if company == "^GSPC":
-            company = "SPY"
-
 
         for i in range(5):
 
@@ -168,10 +168,10 @@ def process_companies(folder, start, end):
 if __name__ == "__main__":
     # IXIC is NASDAQ '^IXIC'
     #GSPC is S&P
-    companies = ["AMZN", "AAPL", "BABA", "FB", "GOOGL", "YHOO",'^GSPC', "QQQ"]
+    companies = ["AMZN", "AAPL", "BABA", "FB", "GOOGL", "YHOO",'SPY', "QQQ"]
 
     start_date = '2015-03-01'
-    end_date = '2015-04-11'
+    end_date = '2015-04-18'
     folder_name = './stock_data'
     """
     folder_name = sys.argv[1]
