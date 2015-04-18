@@ -3,6 +3,10 @@ import sys
 import pandas.io.data as web
 import datetime as dt
 
+
+def average(list):
+    return sum(list) / float(len(list))
+
 def normalization_price(target_list):
     l = len(target_list)
     answer = []
@@ -23,13 +27,13 @@ def normalization_volume_weekly(target_list):
     l = len(target_list_copy)
     number_of_weeks = l / 5
     for i in range(number_of_weeks):
-        local_max =  max(target_list_copy[i * 5 : (i+1)*5])
+        local_max =  average(target_list_copy[i * 5 : (i+1)*5])
         target_list_copy[i * 5 : (i+1)*5] = map(lambda y: y / float(local_max), target_list_copy[i * 5 : (i+1)*5])
 
     # if we have not integer number of week, need to normalize the tail
     last_few_days = l % 5
     if last_few_days != 0:
-        local_max =  max(target_list_copy[-last_few_days :])
+        local_max =  average(target_list_copy[-last_few_days :])
         target_list_copy[-last_few_days : ] = map(lambda y: y / float(local_max), target_list_copy[-last_few_days : ])
 
 
@@ -157,6 +161,7 @@ if __name__ == "__main__":
     # IXIC is NASDAQ '^IXIC'
     #GSPC is S&P
     companies = ["AMZN", "AAPL", "BABA", "FB", "GOOGL", "YHOO",'^GSPC', "QQQ"]
+    #companies = ["AMZN", "BABA", "FB", "YHOO",'^GSPC', "QQQ"]
 
     start_date = '2015-03-01'
     end_date = '2015-04-11'

@@ -6,6 +6,8 @@ import os
 
 all_companies = {}
 
+def average(list):
+    return sum(list) / float(len(list))
 
 def check_if_not_weekend(day_string):
     try:
@@ -46,7 +48,8 @@ def get_page_statistics(day_group_list, page_rank_values):
         unique_user_weights.append(user_weight)
         unique_user_ranks.append(user_rank)
     # return score for given day with weight of user pr and average pr a day
-    ans = [sum(unique_user_weights), sum(unique_user_ranks) / float(len(unique_user_ranks))]
+    #ans = [sum(unique_user_weights), sum(unique_user_ranks) / float(len(unique_user_ranks))]
+    ans = [sum(unique_user_weights), sum(unique_user_ranks)]
     return ans
 
 
@@ -55,13 +58,13 @@ def normalization_volume_weekly(target_list):
     l = len(target_list_copy)
     number_of_weeks = l / 5
     for i in range(number_of_weeks):
-        local_max = max(target_list_copy[i * 5: (i + 1) * 5])
+        local_max = average(target_list_copy[i * 5: (i + 1) * 5])
         target_list_copy[i * 5: (i + 1) * 5] = map(lambda y: y / float(local_max), target_list_copy[i * 5: (i + 1) * 5])
 
     # if we have not integer number of weeks, need to normalize the tail
     last_few_days = l % 5
     if last_few_days != 0:
-        local_max =  max(target_list_copy[-last_few_days :])
+        local_max =  average(target_list_copy[-last_few_days :])
         target_list_copy[-last_few_days : ] = map(lambda y: y / float(local_max), target_list_copy[-last_few_days : ])
 
     return target_list_copy
