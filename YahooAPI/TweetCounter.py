@@ -6,8 +6,10 @@ import os
 
 all_companies = {}
 
+
 def average(list):
     return sum(list) / float(len(list))
+
 
 def check_if_not_weekend(day_string):
     try:
@@ -36,11 +38,12 @@ def get_users_statistics(day_group_list):
     ans = [len(unique_user_keys), sum(unique_user_weights)]
     return ans
 
+
 # get pagerank statistics for one day
 def get_page_statistics(day_group_list, page_rank_values):
     unique_user_weights = []
     unique_user_ranks = []
-    #key
+    # key
     for key, user_group in groupby(day_group_list, lambda x: (x.split()[-2])):
         one_user_messages = list(user_group)
         user_weight = len(one_user_messages) * page_rank_values[key]
@@ -48,8 +51,8 @@ def get_page_statistics(day_group_list, page_rank_values):
         unique_user_weights.append(user_weight)
         unique_user_ranks.append(user_rank)
     # return score for given day with weight of user pr and average pr a day
-    #ans = [sum(unique_user_weights), sum(unique_user_ranks) / float(len(unique_user_ranks))]
-    ans = [sum(unique_user_weights), sum(unique_user_ranks)]
+    ans = [sum(unique_user_weights), sum(unique_user_ranks) / float(len(unique_user_ranks)), sum(unique_user_ranks)]
+    #ans = [sum(unique_user_weights), sum(unique_user_ranks)]
     return ans
 
 
@@ -64,8 +67,8 @@ def normalization_volume_weekly(target_list):
     # if we have not integer number of weeks, need to normalize the tail
     last_few_days = l % 5
     if last_few_days != 0:
-        local_max =  average(target_list_copy[-last_few_days :])
-        target_list_copy[-last_few_days : ] = map(lambda y: y / float(local_max), target_list_copy[-last_few_days : ])
+        local_max = average(target_list_copy[-last_few_days:])
+        target_list_copy[-last_few_days:] = map(lambda y: y / float(local_max), target_list_copy[-last_few_days:])
 
     return target_list_copy
 
@@ -78,6 +81,7 @@ def normalize_and_output(dates, data, output_file, given_period, exlude_period):
     output_file = open(output_file, 'w')
     output_file.writelines(dates_and_data_for_output)
     output_file.close()
+
 
 # process all but output just given list
 def process_one_file(input_filename, period, exclude):
@@ -103,11 +107,11 @@ def process_one_file(input_filename, period, exclude):
     sorted_tweet_users = [v[1][1] for v in sorted_result]
     sorted_tweet_weight_users = [v[1][2] for v in sorted_result]
 
-
     normalize_and_output(dates, sorted_tweet_counts, "./twitter_data/counts/counts_" + input_filename, period, exclude)
     normalize_and_output(dates, sorted_tweet_users, "./twitter_data/users/users_" + input_filename, period, exclude)
     normalize_and_output(dates, sorted_tweet_weight_users,
                          "./twitter_data/weighted_users/weighted_users_" + input_filename, period, exclude)
+
 
 # process all but output just given list
 def process_one_file_for_pagerank(input_filename, period, exclude, rank_path):
@@ -116,7 +120,7 @@ def process_one_file_for_pagerank(input_filename, period, exclude, rank_path):
     with open("./raw_twitter_input/" + input_filename, 'r') as input_file:
         lines = input_file.readlines()
 
-    #get rank values
+    # get rank values
     with open(rank_path, 'r') as input_rank_file:
         rank_lines = input_rank_file.readlines()
 
@@ -141,9 +145,14 @@ def process_one_file_for_pagerank(input_filename, period, exclude, rank_path):
     dates = [v[0] for v in sorted_result]
     sorted_weight_pr = [v[1][0] for v in sorted_result]
     sorted_average_pr = [v[1][1] for v in sorted_result]
+    sorted_full_pr = [v[1][2] for v in sorted_result]
 
-    normalize_and_output(dates, sorted_weight_pr, "./twitter_data/weighted_pr_users/weighted_pr_users_" + input_filename, period, exclude)
-    normalize_and_output(dates, sorted_average_pr, "./twitter_data/average_pr/average_pr_" + input_filename, period, exclude)
+    normalize_and_output(dates, sorted_weight_pr,
+                         "./twitter_data/weighted_pr_users/weighted_pr_users_" + input_filename, period, exclude)
+    normalize_and_output(dates, sorted_average_pr, "./twitter_data/average_pr/average_pr_" + input_filename, period,
+                         exclude)
+    normalize_and_output(dates, sorted_full_pr, "./twitter_data/full_pr/full_pr_" + input_filename, period,
+                         exclude)
 
 
 def calculate_timerange(start, end):
@@ -154,6 +163,7 @@ def calculate_timerange(start, end):
     r = map(lambda x: x.strftime("%Y-%m-%d"), r)
     return r
 
+
 if __name__ == "__main__":
     start_date = '2015-03-01'
     end_date = '2015-04-11'
@@ -161,11 +171,10 @@ if __name__ == "__main__":
 
     currencies = ["USDJPY", "EURUSD", "EURGBP"]
 
-
     files = [f for f in os.listdir('./raw_twitter_input')]
     for f in files:
         if f.endswith(".txt"):
-            #make a list of dates, for which we don't have stock data. it is different for currencies and companies
+            # make a list of dates, for which we don't have stock data. it is different for currencies and companies
             name = f[:-4]
             exclude_range = [] if name in currencies else ['2015-04-03']
             process_one_file(f, period_range, exclude_range)
@@ -174,7 +183,6 @@ if __name__ == "__main__":
     start_date_pr = '2015-03-01'
     end_date_pr = '2015-03-28'
     period_range_pr = calculate_timerange(start_date_pr, end_date_pr)
-
 
     pr_symbols = ["AMZN", "BABA", "EURUSD", "FB", "YHOO", "QQQ", "SPY", "USDJPY"]
     for symbol in pr_symbols:

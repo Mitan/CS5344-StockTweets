@@ -136,6 +136,8 @@ process_correlations("./twitter_data/weighted_pr_users/weighted_pr_users_",
                      './calculated_correlations/weight_pr_correlations.txt', True)
 process_correlations("./twitter_data/average_pr/average_pr_", './calculated_correlations/average_pr_correlations.txt',
                      True)
+process_correlations("./twitter_data/full_pr/full_pr_", './calculated_correlations/full_pr_correlations.txt',
+                     True)
 process_correlations("./twitter_data/counts/counts_", './calculated_correlations/count_correlations.txt', False)
 process_correlations("./twitter_data/users/users_", './calculated_correlations/users_correlations.txt', False)
 process_correlations("./twitter_data/weighted_users/weighted_users_",
