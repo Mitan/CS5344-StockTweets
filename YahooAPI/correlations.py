@@ -133,6 +133,9 @@ def process_correlations(partial_path_to_twitter_features, output_file_path, is_
     correlations_file.close()
 
 
+process_correlations("./edges_raw/normalized_edges/",
+                     './calculated_correlations/edges_correlations.txt', True)
+
 process_correlations("./twitter_data/weighted_pr_users/weighted_pr_users_",
                      './calculated_correlations/weight_pr_correlations.txt', True)
 process_correlations("./twitter_data/average_pr/average_pr_", './calculated_correlations/average_pr_correlations.txt',
