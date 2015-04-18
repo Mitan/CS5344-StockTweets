@@ -62,7 +62,7 @@ def GetCompanyData(startDate, endDate, companyName):
     closeData = [x[3] for x in values]
     volumeData = [x[4] for x in values]
     # open - close
-    dayDifferenceData = [abs(x[0] - x[3]) for x in values]
+    dayDifferenceData = [abs(x[2] - x[1]) for x in values]
     # this feature doesn't nedd normalization
     binary_diff = [1 if x[3] > x[0] else 0 for x in values]
 
