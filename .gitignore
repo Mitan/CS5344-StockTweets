@@ -4,6 +4,7 @@
 
 *.iml
 
+.~lock*
 YahooAPI/raw_twitter_input/*
 
 YahooAPI/page_ranks/*
