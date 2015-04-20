@@ -1,4 +1,12 @@
+# -*- coding: utf-8 -*-
+
 import math
+
+
+def variance(target_list):
+    mean = average(target_list)
+    sq = [(x - mean) ** 2 for x in target_list]
+    return math.sqrt(sum(sq) / float(len(target_list)))
 
 
 def average(target_list):
@@ -120,17 +128,21 @@ def process_correlations(partial_path_to_twitter_features, output_file_path, is_
                     current_company_answer[3]) + "\t\t\t" + str(
                     current_company_answer[4]) + "\t\t\t" + str(current_company_answer[5]) + '\n')
 
-        average_close = average([v[2] for v in answer_companies])
-        average_open = average([v[1] for v in answer_companies])
-        average_volume = average([v[3] for v in answer_companies])
-        average_diff = average([v[4] for v in answer_companies])
-        average_binary_diff = average([v[5] for v in answer_companies])
+        average_close = [average([v[2] for v in answer_companies]), variance([v[2] for v in answer_companies])]
+        average_open = [average([v[1] for v in answer_companies]), variance([v[1] for v in answer_companies])]
+        average_volume = [average([v[3] for v in answer_companies]), variance([v[3] for v in answer_companies])]
+        average_diff = [average([v[4] for v in answer_companies]), variance([v[4] for v in answer_companies])]
+        average_binary_diff = [average([v[5] for v in answer_companies]), variance([v[5] for v in answer_companies])]
         correlations_file.write(
-            "Aver\t" + str(round(average_open, 4)) + "\t\t\t" + str(round(average_close, 4)) + "\t\t\t" + str(
-                round(average_volume, 4)) + "\t\t\t" + str(
-                round(average_diff,4)) + "\t\t\t" + str(round(average_binary_diff,4))
+            "Aver\t" + out_av(average_open) + "\t" + out_av(average_close) + "\t" + out_av(average_volume) +
+            "\t" +
+            out_av(average_diff) + "\t" + out_av(average_binary_diff)
             + '\n')
     correlations_file.close()
+
+
+def out_av(av_value):
+    return str(round(av_value[0], 4)) + '±' + str(round(av_value[1], 4))
 
 
 process_correlations("./edges_raw/normalized_edges/",
