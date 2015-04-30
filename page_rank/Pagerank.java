@@ -55,7 +55,7 @@ public class Pagerank {
 					String id = itr.nextToken();
 					float current_rank = Float.parseFloat(itr.nextToken());					
 					page_rank.put(id,new Float(current_rank));
-					error_page_rank.put(id,new Float(0.0f));
+					error_page_rank.put(id,new Float(1.0f));
 				}
 			}
 			
@@ -199,13 +199,18 @@ public static float calculate_error()throws Exception
 	initiallize(); 
 	matrix_size =  page_rank.size();
 	teleport = (1.0f - beta);
-	int max_runs = 30;
-	
-	for (int i=0; i<=max_runs ;i++)
+	//int max_runs = 30;
+	int i = 0;
+	while (!stop)
 	{
 		delete_output("/output");
-		if (i == max_runs)
+		//error < 0.5% of 1.0 initial, stop
+		System.out.println ("----------average change in previous stage--------");
+		float error = calculate_error();
+		System.out.println(error);
+		if (error < 0.005f)
 			stop = true;
+		i = i+1;
 		System.out.println("run ith times : i = " + i);
 		Configuration conf_stage1 = new Configuration();
 		Job stage1 = Job.getInstance(conf_stage1, "Stage1");
@@ -218,9 +223,6 @@ public static float calculate_error()throws Exception
 		FileInputFormat.addInputPath(stage1, new Path("/input/graph_out.txt"));
 		FileOutputFormat.setOutputPath(stage1, new Path("/output"));
 		stage1.waitForCompletion(true); 
-		
-		System.out.println ("----------average change in previous stage--------");
-		System.out.println(calculate_error());
 	}
 
 		Configuration conf_stage2 = new Configuration();
